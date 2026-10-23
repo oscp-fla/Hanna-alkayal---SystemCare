@@ -1,0 +1,60 @@
+#!/bin/bash
+
+LOG_FILE="systemcare.log"
+
+log_message() {
+    local message="$1"
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - $message" >> "$LOG_FILE"
+}
+
+usage() {
+    echo "Usage: $0 report -o <output_file>"
+    exit 1
+}
+
+generate_report() {
+    local output_file="$1"
+    
+    if [ -n "$output_file" ]; then
+        echo "Saving to file: $output_file"
+    fi
+    
+    echo "Collecting system information..."
+
+    {
+        echo "===================================="
+        echo "           SYSTEM CARE REPORT         "
+        echo "===================================="
+        echo "Date & Time: $(date)"
+        echo "User:        $USER"
+        echo "Hostname:    $(hostname)"
+        echo "------------------------------------"
+        echo "Disk Usage:"
+        df -h
+        echo "------------------------------------"
+        echo "Memory Usage:"
+        free -h
+        echo "===================================="
+    } > "$output_file"
+
+    log_message "Generated system report successfully into '$output_file'"
+    echo "Report created successfully and saved to: $output_file"
+    cat "$output_file"
+}
+
+if [ $# -lt 3 ]; then
+    usage
+fi
+
+case "$1" in
+    report)
+        if [ "$2" = "-o" ]; then
+            generate_report "$3"
+        else
+            usage
+        fi
+        ;;
+    *)
+        usage
+        ;;
+esac
